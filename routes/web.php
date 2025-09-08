@@ -31,7 +31,7 @@ Route::get('/admin/dev/check', function () {
 })->name('admin.dev.check');
 
 // ---- User auth ----
-Route::middleware('guard.session:web')->group(function () {
+Route::middleware(['single.role.session','guard.session:web'])->group(function () {
     Route::get('/register', [UserAuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [UserAuthController::class, 'register']);
     Route::get('/login', [UserAuthController::class, 'showLogin'])->name('login');
@@ -40,7 +40,7 @@ Route::middleware('guard.session:web')->group(function () {
 });
 
 // ---- User area (must login) ----
-Route::middleware(['guard.session:web','auth:web'])->group(function () {
+Route::middleware(['single.role.session','guard.session:web','auth:web'])->group(function () {
     Route::view('/dashboard', 'user.dashboard')->name('dashboard');
 
     // profile
@@ -54,13 +54,13 @@ Route::middleware(['guard.session:web','auth:web'])->group(function () {
 });
 
 // ---- Admin auth ----
-Route::prefix('admin')->middleware('guard.session:admin')->group(function () {
+Route::prefix('admin')->middleware(['guard.session:admin'])->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
     Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
     // admin panel (must be admin)
-    Route::middleware(['guard.session:admin','auth:admin'])->group(function () {
+    Route::middleware(['single.role.session','guard.session:admin','auth:admin'])->group(function () {
         Route::get('/dashboard', [AdminPanelController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/users', [AdminPanelController::class, 'users'])->name('admin.users');
         Route::get('/contacts', [AdminPanelController::class, 'contacts'])->name('admin.contacts');

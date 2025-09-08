@@ -13,7 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'guard.session' => App\Http\Middleware\GuardSession::class,
+            'separate.sessions' => App\Http\Middleware\SeparateGuardSessions::class,
+            'single.role.session' => App\Http\Middleware\EnforceSingleRoleSession::class,
         ]);
+
+        // Ensure per-area session cookie is selected BEFORE StartSession runs
+        $middleware->prependToGroup('web', App\Http\Middleware\SeparateGuardSessions::class);
 
         $middleware->redirectGuestsTo(function ($request) {
             $path = ltrim($request->path(), '/');

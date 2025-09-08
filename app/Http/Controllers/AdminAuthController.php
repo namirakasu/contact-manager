@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+ 
 
 class AdminAuthController extends Controller
 {
@@ -21,6 +22,8 @@ class AdminAuthController extends Controller
 
         if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+            // Mark browser role as admin
+            cookie()->queue(cookie('cm_role', 'admin', 60 * 24 * 7));
             return redirect()->route('admin.dashboard');
         }
 
