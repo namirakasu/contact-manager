@@ -3,44 +3,29 @@
 namespace App\Exports;
 
 use App\Models\User;
-use Illuminate\Http\Response;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class UsersExport
+class UsersExport implements FromCollection, WithHeadings
 {
-    public function download()
-    {
-        $users = User::all();
-        
-        $filename = 'users_' . date('Y-m-d_H-i-s') . '.csv';
-        
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-        
-        $callback = function() use ($users) {
-            $file = fopen('php://output', 'w');
-            
-            // Add headers
-            fputcsv($file, ['ID', 'Name', 'Email', 'Gender', 'Date of Birth', 'Address', 'Contact', 'Created At']);
-            
-            // Add data
-            foreach ($users as $user) {
-                fputcsv($file, [
-                    $user->id,
-                    $user->name,
-                    $user->email,
-                    $user->gender ?? '',
-                    $user->dob ?? '',
-                    $user->address ?? '',
-                    '="' . ($user->contact ?? '') . '"',
-                    '="' . $user->created_at->format('Y-m-d H:i:s') . '"'
-                ]);
-            }
-            
-            fclose($file);
-        };
-        
-        return response()->stream($callback, 200, $headers);
-    }
+	public function collection()
+	{
+		return User::all()->map(function ($user) {
+			return [
+				'ID' => $user->id,
+				'Name' => $user->name,
+				'Email' => $user->email,
+				'Gender' => $user->gender ?? '',
+				'Date of Birth' => $user->dob ?? '',
+				'Address' => $user->address ?? '',
+				'Contact' => $user->contact !== null ? '="' . $user->contact . '"' : '',
+				'Created At' => $user->created_at ? '="' . $user->created_at->format('Y-m-d H:i:s') . '"' : '',
+			];
+		});
+	}
+
+	public function headings(): array
+	{
+		return ['ID', 'Name', 'Email', 'Gender', 'Date of Birth', 'Address', 'Contact', 'Created At'];
+	}
 }
