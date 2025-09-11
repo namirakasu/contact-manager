@@ -27,8 +27,8 @@
 </form>
 
 <div class="mb-3">
-  <a class="btn btn-success me-2" href="{{ route('admin.export.users', ['format' => 'csv']) }}">Export Users to CSV</a>
-  <a class="btn btn-outline-success" href="{{ route('admin.export.users', ['format' => 'xlsx']) }}">Export Users to Excel</a>
+  <a class="btn btn-success me-2" href="{{ route('admin.export.users', ['format' => 'xlsx']) }}">Export Users to Excel (XLSX)</a>
+  <a class="btn btn-outline-secondary" href="{{ route('admin.export.users', ['format' => 'csv']) }}">Export Users to CSV</a>
   </div>
 
 <div class="table-responsive">

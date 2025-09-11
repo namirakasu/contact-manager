@@ -5,11 +5,29 @@ namespace App\Exports;
 use App\Models\Contact;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithDrawings;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use Carbon\Carbon;
 
-class ContactsExport implements FromCollection, WithHeadings
+class ContactsExport implements FromCollection, WithHeadings, WithEvents, WithColumnWidths, WithCustomStartCell, WithDrawings
 {
-	public function collection()
+	/** @var string */
+	private $exportedAt;
+
+	public function __construct()
 	{
+		$this->exportedAt = Carbon::now()->format('Y-m-d H:i:s');
+	}
+
+	public function collection()
+	{         //return the collection of contacts
 		return Contact::with('user')->get()->map(function ($contact) {
 			return [
 				'ID' => $contact->id,
@@ -21,9 +39,87 @@ class ContactsExport implements FromCollection, WithHeadings
 			];
 		});
 	}
-
+      //return the headings
 	public function headings(): array
 	{
 		return ['ID', 'Name', 'Email', 'Contact', 'User', 'Created At'];
+	}
+
+	public function startCell(): string
+	{
+		return 'A4';
+	}
+
+	public function columnWidths(): array
+	{
+		return [
+			'B' => 40, // Name
+		];
+	}
+
+	public function drawings()
+	{
+		$possible = [
+			public_path('logo.png'),
+			public_path('logo.jpg'),
+			public_path('logo.jpeg'),
+			public_path('logo.gif'),
+			base_path('public/logo.png'),
+			base_path('public/logo.jpg'),
+			base_path('public/logo.jpeg'),
+			base_path('public/logo.gif'),
+		];
+		$logoPath = null;
+		foreach ($possible as $candidate) {
+			if (file_exists($candidate)) {
+				$logoPath = $candidate;
+				break;
+			}
+		}
+
+		if ($logoPath) {
+			$drawing = new Drawing();
+			$drawing->setName('Project Logo');
+			$drawing->setDescription('contact-manager');
+			$drawing->setPath($logoPath);
+			$drawing->setHeight(28);
+			$drawing->setCoordinates('A1');
+			$drawing->setOffsetX(2);
+			$drawing->setOffsetY(2);
+			return [$drawing];
+		}
+
+		return [];
+	}
+
+	public function registerEvents(): array
+	{
+		return [
+			AfterSheet::class => function (AfterSheet $event) {
+				$headingsCount = count($this->headings());
+				$lastColumn = Coordinate::stringFromColumnIndex($headingsCount);
+
+				$event->sheet->getDelegate()->getRowDimension(1)->setRowHeight(34);
+				$event->sheet->getDelegate()->getRowDimension(2)->setRowHeight(20);
+
+				$event->sheet->setCellValue('B1', 'contact-manager');
+				$event->sheet->mergeCells("B1:{$lastColumn}1");
+				$event->sheet->getDelegate()->getStyle("B1:{$lastColumn}1")->getFont()->setBold(true)->setSize(16);
+				$event->sheet->getDelegate()->getStyle("B1:{$lastColumn}1")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT)->setVertical(Alignment::VERTICAL_CENTER);
+
+				$event->sheet->setCellValue('B2', 'Export Time: ' . $this->exportedAt);
+				$event->sheet->mergeCells("B2:{$lastColumn}2");
+				$event->sheet->getDelegate()->getStyle("B2:{$lastColumn}2")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+				$headerRange = "A4:{$lastColumn}4";
+				$event->sheet->getDelegate()->getStyle($headerRange)->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
+				$event->sheet->getDelegate()->getStyle($headerRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF1F4E78');
+				$event->sheet->getDelegate()->getStyle($headerRange)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+				$event->sheet->getDelegate()->getRowDimension(4)->setRowHeight(22);
+
+				$event->sheet->freezePane('A5');
+				$event->sheet->setAutoFilter($headerRange);
+			}
+		];
 	}
 }

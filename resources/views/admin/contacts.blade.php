@@ -15,13 +15,13 @@
     <button class="btn btn-primary w-100">Search</button>
   </div>
   <div class="col-md-2">
-    <a href="{{ route('admin.contacts') }}" class="btn btn-secondary w-100">Reset</a>
+    <a href="{{ route('admin.contacts') }}" class="btn btn-secondary w-100">Reset</a> 
   </div>
 </form>
-
+    //export contacts to csv or excel
 <div class="mb-3">
-  <a class="btn btn-success me-2" href="{{ route('admin.export.contacts', ['format' => 'csv']) }}">Export Contacts to CSV</a>
-  <a class="btn btn-outline-success" href="{{ route('admin.export.contacts', ['format' => 'xlsx']) }}">Export Contacts to Excel</a>
+  <a class="btn btn-success me-2" href="{{ route('admin.export.contacts', ['format' => 'xlsx']) }}">Export Contacts to Excel (XLSX)</a>
+  <a class="btn btn-outline-secondary" href="{{ route('admin.export.contacts', ['format' => 'csv']) }}">Export Contacts to CSV</a>
 </div>
 
 <div class="table-responsive">

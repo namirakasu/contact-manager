@@ -23,7 +23,7 @@
       <h5 class="mb-2">Registered Users</h5>
       <p class="text-muted mb-3">Total: {{ $counts['users'] }}</p>
       <a class="btn btn-primary" href="{{ route('admin.users') }}">View Registered Users</a>
-      <a class="btn btn-success" href="{{ route('admin.export.users') }}">Export CSV</a>
+      <a class="btn btn-success" href="{{ route('admin.export.users', ['format' => 'xlsx']) }}">Export XLSX</a>
     </div>
   </div>
 
@@ -32,7 +32,7 @@
       <h5 class="mb-2">Submitted Contacts</h5>
       <p class="text-muted mb-3">Total: {{ $counts['contacts'] }}</p>
       <a class="btn btn-primary" href="{{ route('admin.contacts') }}">View Submitted Contacts</a>
-      <a class="btn btn-success" href="{{ route('admin.export.contacts') }}">Export CSV</a>
+      <a class="btn btn-success" href="{{ route('admin.export.contacts', ['format' => 'xlsx']) }}">Export XLSX</a>
     </div>
   </div>
 </div>
