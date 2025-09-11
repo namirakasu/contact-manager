@@ -7,14 +7,14 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class SimpleNotificationMail extends Mailable
-{
+{      //send the notification email
     use Queueable, SerializesModels;
 
     public string $line;
 
     public function __construct(string $line)
     {
-        $this->line = $line;
+        $this->line = $line;      
     }
 
     public function build()

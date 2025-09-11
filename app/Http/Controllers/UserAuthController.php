@@ -11,15 +11,15 @@ use Illuminate\Support\Facades\Mail;
  
 
 class UserAuthController extends Controller
-{
+{       //show the register page
     public function showRegister()
-    {
+    {      //return the view with the register page
         return view('user.register');
     }
-
+    //process the register request
     public function register(Request $request)
     {
-        $data = $request->validate([
+        $data = $request->validate([      //validate the data
             'name'     => 'required|min:3',
             'email'    => 'required|email|unique:users',
             'password' => 'required|min:6|confirmed',
@@ -48,24 +48,24 @@ class UserAuthController extends Controller
     }
 
     public function showLogin()
-    {
+    {      //return the view with the login page
         return view('user.login');
     }
-
+   
     public function login(Request $request)
-    {
+    {      //validate the data
         $credentials = $request->validate([
             'email'    => 'required|email',
             'password' => 'required',
         ]);
-
+        //attempt to log in the user
         if (Auth::guard('web')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            // Mark browser role as user
+            // mark browser role as user
             cookie()->queue(cookie('cm_role', 'user', 60 * 24 * 7));
             // send login success email
             try {
-                $user = Auth::guard('web')->user();
+                $user = Auth::guard('web')->user(); //get the user
                 if ($user && $user->email) {
                     $message = "Login successful: {$user->name}";
                     Mail::to($user->email)->send(new SimpleNotificationMail($message));
@@ -76,7 +76,7 @@ class UserAuthController extends Controller
                     }
                 }
             } catch (\Throwable $e) {
-                // swallow mail errors to not block login
+
             }
             return redirect()->route('dashboard');
         }
@@ -85,7 +85,7 @@ class UserAuthController extends Controller
     }
 
     public function logout(Request $request)
-    {
+    {      //logout the user
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -7,19 +7,19 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 class ProfileController extends Controller
-{
+{      //show the profile edit page
     public function edit()
-    {
-        $user = Auth::user();
+    {      //get the user
+        $user = Auth::user(); //retrievess the currently authenticated user
         return view('user.profile', compact('user'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request)      //update the profile
     {
-        /** @var User $user */
+        /** @var User $user */      //get the user
         $user = Auth::user();
 
-        $data = $request->validate([
+        $data = $request->validate([      //validate the data
             'name'     => 'required|min:3',
             'email'    => 'required|email|unique:users,email,'.$user->id,
             'gender'   => 'nullable|string',
@@ -29,16 +29,16 @@ class ProfileController extends Controller
             'profile_pic' => 'nullable|image|max:2048'
         ]);
 
-        if ($request->hasFile('profile_pic')) {
+        if ($request->hasFile('profile_pic')) {      //store the profile picture
             $path = $request->file('profile_pic')->store('profiles', 'public');
             $data['profile_pic'] = $path;
         }
 
-        // Password updates removed from profile edit per requirements
+        // update the profile
 
         $user->update($data);
 
-        // After update, go back to previous page (e.g., dashboard), then user can navigate to welcome
+        // go back to previous page 
         return redirect()->back()->with('success', 'Profile Updated Successfully.');
     }
 }
